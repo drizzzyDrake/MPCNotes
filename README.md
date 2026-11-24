@@ -1,4 +1,4 @@
-# MPC Notes — Parallel Computing & C Exercises
+# MPC Notes 
 
 Raccolta di esercizi, esempi pratici e appunti per il corso di **Multicore & Parallel Computing (MPC)**.
 
