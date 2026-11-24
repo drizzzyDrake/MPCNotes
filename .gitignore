@@ -1,0 +1,19 @@
+# Eseguibili e temporanei in course/
+/course/*
+!/course/*.c
+!/course/*.txt
+!/course/Makefile
+
+# Eseguibili in exc/
+/exc/*
+!/exc/*.c
+!/exc/Makefile
+
+# Progetti gestiti nelle rispettive repo
+/project/
+
+# File oggetto e temporanei
+*.o
+*.d
+*.out
+*.wav

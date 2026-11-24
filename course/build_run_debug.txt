@@ -1,0 +1,11 @@
+Compilation:
+
+mpicc -g -Wall file_name.c -o file_name
+
+Execution:
+
+mpiexec -n <number of processes> ./file_name
+
+Debugging
+
+mpiexec -n <number of processes> ./test : -n 1 ddd ./test : -n 1 ./test
