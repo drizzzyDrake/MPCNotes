@@ -1,0 +1,182 @@
+===================================================================================
+SUPERCOMPUTER & DATACENTER: STRUTTURA E METRICHE
+===================================================================================
+
+-----------------------------------------------------------------------------------
+1. STRUTTURA ARCHITETTURALE (SISTEMI A MEMORIA DISTRIBUITA)
+-----------------------------------------------------------------------------------
+
+A livello logico e fisico, un supercomputer e' un sistema a memoria distribuita
+composto da migliaia di nodi indipendenti, ciascuno dotato del proprio spazio di
+indirizzamento privato, collegati da una rete ad altissima velocita' e bassissima
+latenza (Interconnect).
+
+[SCHEMA 1: ARCHITETTURA GLOBALE A MEMORIA DISTRIBUITA]
+
+  +-----------------+   +-----------------+                     +-----------------+
+  |   NODO / BLADE  |   |   NODO / BLADE  |                     |   NODO / BLADE  |
+  |        0        |   |        1        |         ...         |       n-1       |
+  +--------+--------+   +--------+--------+                     +--------+--------+
+           |                     |                                       |
+           v                     v                                       v
+  +-------------------------------------------------------------------------------+
+  |                                 INTERCONNECT                                  |
+  |        (es. NVIDIA InfiniBand NDR, HPE Slingshot-11, Tofu-D, Custom)          |
+  +-------------------------------------------------------------------------------+
+
+
+[SCHEMA 2: ANATOMIA INTERNA DI UN SINGOLO NODO / SERVER / BLADE]
+
+  +-------------------------------------------------------------------------------+
+  |                             NODO / SERVER / BLADE                             |
+  |                                                                               |
+  |  +-----------------------------+             +-----------------------------+  |
+  |  |             CPU             | <--+   +--> |             GPU             |  |
+  |  |  +----------+ +----------+  |    |   |    |  +-----------------------+  |  |
+  |  |  |  Core 0  | |  Core 1  |  |    |   |    |  | Ctl | L1 | ALUs ...   |  |  |
+  |  |  | ALU|Ctrl | | ALU|Ctrl |  |    v   v    |  +-----------------------+  |  |
+  |  |  | L1 Cache | | L1 Cache |  |    +---+    |  | Ctl | L1 | ALUs ...   |  |  |
+  |  |  +----------+ +----------+  |    | P |    |  +-----------------------+  |  |
+  |  |  +----------+ +----------+  |    | C |    |  | Ctl | L1 | ALUs ...   |  |  |
+  |  |  |  Core 2  | |  Core 3  |  |    | I |    |  +-----------------------+  |  |
+  |  |  | ALU|Ctrl | | ALU|Ctrl |  |    | - |    |  | Ctl | L1 | ALUs ...   |  |  |
+  |  |  | L1 Cache | | L1 Cache |  |    | E |    |  +-----------------------+  |  |
+  |  |  +----------+ +----------+  |    | x |    |  Streaming Multiprocessors  |  |
+  |  |  +-----------------------+  |    | p |    |  +-----------------------+  |  |
+  |  |  |    L2 and L3 Cache    |  |    | r |    |  |       L2 Cache        |  |  |
+  |  |  +-----------------------+  |    | e |    |  +-----------------------+  |  |
+  |  +-----------------------------+    | s |    +-----------------------------+  |
+  |                 ^                   | s |                   ^                 |
+  |                 |                   +---+                   |                 |
+  |                 v                   ^   ^                   v                 |
+  |  +-----------------------------+    |   |    +-----------------------------+  |
+  |  |         DRAM (Host)         |    |   +--> |          DRAM (GPU)         |  |
+  |  +-----------------------------+    |        +-----------------------------+  |
+  |                                     v          (Nota: fino a 4/8 GPU/nodo)    |
+  |                                  +---------+                                  |
+  |   (Nota: 1 NIC ogni 1 o 2 GPU)   |   NIC   |                                  |
+  |                                  +----+----+                                  |
+  +---------------------------------------|---------------------------------------+
+                                          |
+                                          v
+                                    Interconnect ...
+
+
+[DETTAGLIO COMPONENTI DEL NODO]
+
+- CPU (Host)   : Processore multi-core general-purpose; ogni core ha ALU (calcolo),
+                 Control Unit (decodifica/flusso) e L1 Cache privata, mentre L2/L3
+                 sono condivise tra i core per ridurre la latenza verso la DRAM.
+- GPU (Device) : Acceleratore massivamente parallelo suddiviso in Streaming
+                 Multiprocessors (SM). Ogni SM condivide un'unica Control Unit e
+                 una L1 Cache tra decine di semplici ALU (esecuzione SIMT), con una
+                 L2 Cache globale e memoria dedicata ad altissima banda (HBM/DRAM).
+                 Sistemi moderni ospitano fino a 4 o 8 GPU per singolo nodo.
+- PCI-Express  : Bus di interconnessione interno ad alta banda che collega CPU,
+                 GPU (incluso accesso diretto DMA alla DRAM della GPU) e NIC.
+- NIC          : Network Interface Card; interfaccia il nodo con la rete globale.
+                 Per evitare colli di bottiglia nelle comunicazioni multi-GPU, si
+                 installa 1 NIC dedicata per ogni GPU (o 1 NIC ogni 2 GPU).
+
+
+[SCHEMA 3: GERARCHIA DI SCALA (5 LIVELLI)]
+
+1. CORE          --> Unita' base: ALU + unita' SIMD/FP + Load/Store + Cache L1
+|
+v
+2. PROCESSOR     --> Chip singolo con decine di Core + Cache condivisa (L2/L3)
+|
+v
+3. BLADE (NODO)  --> Scheda con piu' CPU + piu' GPU (4-8) + DRAM condivisa + NIC
+|
+v
+4. RACK          --> Armadio con decine di Blade/Nodi + Switch di rete locale
+|
+v
+5. FULL SYSTEM   --> Centinaia di Rack + Interconnect globale ad alta velocita'
+
+
+[SCHEMA 4: PARADIGMI DI PROGRAMMAZIONE PER LIVELLO (APPROCCIO IBRIDO)]
+
+- Core CPU      ---> Pthread / OpenMP  (Parallelismo a memoria condivisa sul nodo)
+- Core GPU      ---> CUDA              (Parallelismo massivo sugli acceleratori)
+- Tra i Nodi    ---> MPI               (Message Passing su memoria distribuita)
+
+
+[TENDENZE ARCHITETTURALI NELLA CLASSIFICA TOP500]
+
+- Acceleratori   : Solo una minoranza dei sistemi e' "CPUs Only" (es. LineShine,
+                   Fugaku). La quasi totalita' della potenza di calcolo deriva da
+                   nodi ibridi CPU+GPU dominati da NVIDIA (H100, H200, GH200, A100),
+                   AMD (Instinct MI300A, MI250X) e Intel (Data Center GPU Max).
+- Reti di rete   : Il Gigabit Ethernet e' relegato a sistemi minori o gestione.
+                   I sistemi di vertice usano interconnessioni dedicate a bassa
+                   latenza: NVIDIA InfiniBand, HPE Slingshot e reti
+                   custom/proprietarie.
+
+
+-----------------------------------------------------------------------------------
+2. METRICHE DI PRESTAZIONE E BENCHMARK
+-----------------------------------------------------------------------------------
+
+A. UNITA' DI MISURA E PARAMETRI TOP500
+- FLOP/s  : Floating-Point Operations per Second (operazioni in virgola mobile
+            al secondo, tipicamente in doppia precisione FP64).
+- Rpeak   : Picco teorico massimo dell'hardware, calcolato moltiplicando il
+            numero totale di core, la frequenza di clock e le FLOP per ciclo.
+- Rmax    : Prestazione sostenuta massima misurata eseguendo il benchmark HPL
+            (High-Performance Linpack: risoluzione di un sistema lineare denso
+            A*x = b tramite fattorizzazione LU).
+
+B. ORDINI DI GRANDEZZA A CONFRONTO
+- Singola CPU di fascia alta : ~10^12 FLOP/s (1 TeraFLOP/s)
+- Supercomputer Exascale     : >10^18 FLOP/s (1 ExaFLOP/s = 1.000 PFlop/s)
+- Rapporto di scala          : 6 ordini di grandezza (1.000.000x piu' potente)
+
+C. BENCHMARK TOP500 (HPL) vs BENCHMARK REALISTICO (HPCG)
+- HPL (TOP500) : Benchmark denso e fortemente "compute-bound" (satura le ALU
+                 nascondendo i limiti di banda della memoria e della rete).
+- HPCG         : High-Performance Conjugate Gradients; risolve sistemi sparsi
+                 con pattern di accesso irregolari ai dati, risultando fortemente
+                 "memory-bound" e "network-bound" (piu' fedele alle app reali).
+- Divario      : Le prestazioni su HPCG sono circa 100 volte inferiori
+                 rispetto a Rmax (calo di 2 ordini di grandezza).
+
+     Esempio concreto (Sistema #1 LineShine):
+- Rmax (HPL) : 2.198,40 PFlop/s  (~2,20 x 10^18 FLOP/s)
+- HPCG       :    22,00 PFlop/s  (22.004,90 TFlop/s)  --> ~100x inferiore
+
+
+-----------------------------------------------------------------------------------
+3. TABELLA METRICHE PRINCIPALI SISTEMI (TOP 10)
+-----------------------------------------------------------------------------------
+
+Rank | Sistema (Paese)        | Core Tot.  | Rmax     | Rpeak    | Potenza
+     |                        |            | [PFlop/s]| [PFlop/s]| [kW]
+-----+------------------------+------------+----------+----------+---------
+  1  | LineShine (Cina)       | 13.789.440 | 2.198,40 | 2.735,82 | 42.220*
+  2  | El Capitan (USA)       | 11.340.000 | 1.809,00 | 2.821,10 | 29.685
+  3  | Frontier (USA)         |  9.066.176 | 1.353,00 | 2.055,72 | 24.607
+  4  | Aurora (USA)           |  9.264.128 | 1.012,00 | 1.980,01 | 38.698
+  5  | JUPITER Booster (GER)  |  4.801.344 | 1.000,00 | 1.226,28 | 15.794
+  6  | HPC7 - Eni (Italia)    |  3.461.472 |   571,50 |   861,13 |  8.735
+  7  | Eagle - Azure (USA)    |  2.073.600 |   561,20 |   846,84 |   N/D
+  8  | HPC6 - Eni (Italia)    |  3.143.520 |   477,90 |   606,97 |  8.461
+  9  | Fugaku (Giappone)      |  7.630.848 |   442,01 |   537,21 | 29.899
+ 10  | Alps (Svizzera)        |  2.121.600 |   434,90 |   574,84 |  7.124
+
+[DETTAGLIO HARDWARE SISTEMI TOP 10]
+- #1  LineShine       : LX2 304C 1.55GHz (Solo CPU), rete custom LingQi.
+- #2  El Capitan      : HPE Cray EX255a, AMD EPYC 24C + AMD Instinct MI300A, Slingshot-11.
+- #3  Frontier        : HPE Cray EX235a, AMD EPYC 64C + AMD Instinct MI250X, Slingshot-11.
+- #4  Aurora          : HPE Cray EX, Intel Xeon Max 52C + Intel GPU Max, Slingshot-11.
+- #5  JUPITER Booster : BullSequana XH3000, NVIDIA GH200 Superchip 72C, InfiniBand NDR200.
+- #6  HPC7 (Eni)      : HPE Cray EX255a, AMD EPYC 24C + AMD Instinct MI300A, Slingshot-11.
+- #7  Eagle (Azure)   : Microsoft NDv5, Xeon Platinum 48C + NVIDIA H100, InfiniBand NDR.
+- #8  HPC6 (Eni)      : HPE Cray EX235a, AMD EPYC 64C + AMD Instinct MI250X, Slingshot-11.
+- #9  Fugaku          : Fujitsu A64FX 48C 2.2GHz (Solo CPU), rete Tofu interconnect D.
+- #10 Alps (CSCS)     : HPE Cray EX254n, NVIDIA Grace 72C + GH200 Superchip, Slingshot-11.
+
+- Nota consumo energetico: 42.220 kW (42,2 MW) equivalgono al fabbisogno
+  elettrico medio di circa 30.000 abitazioni[cite: 13].
+===================================================================================

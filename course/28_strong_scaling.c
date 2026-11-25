@@ -67,10 +67,18 @@ int main(int argc, char* argv[]) {
 
     long long serial_sum = 0;
     double start_serial = MPI_Wtime();
-
+    
     for(int i = 0; i < N; i++) {
-      serial_sum += vector[i];
+
+    double x = vector[i];
+
+    /* Simula lavoro pesante. */
+    for(int j = 0; j < 50; j++) {
+      x = x * 1.000001;
     }
+
+    serial_sum += (long long)x;
+  }
 
     double finish_serial = MPI_Wtime();
     serial_time = finish_serial - start_serial;
@@ -111,10 +119,19 @@ int main(int argc, char* argv[]) {
     MPI_COMM_WORLD
   );
 
+  /* VERSIONE PARALLELA. */
   long long local_sum = 0;
 
   for(int i = 0; i < local_n; i++) {
-    local_sum += local_vector[i];
+
+    double x = local_vector[i];
+
+    /* Simula lavoro pesante. */
+    for(int j = 0; j < 50; j++) {
+      x = x * 1.000001;
+    }
+
+    local_sum += (long long)x;
   }
 
   long long global_sum;

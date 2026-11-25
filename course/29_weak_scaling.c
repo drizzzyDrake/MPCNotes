@@ -63,17 +63,25 @@ int main(int argc, char* argv[]) {
    *      N = LOCAL_N * numero processi
    *
    * In questo modo confrontiamo il tempo necessario
-   * per risolvere lo stesso problema in modo sequenziale.
-   */
+   * per risolvere lo stesso problema in modo sequenziale. */
   if(my_rank == 0) {
 
     long long serial_sum = 0;
 
     double start_serial = MPI_Wtime();
 
-    for(int i = 0; i < total_n; i++) {
-      serial_sum += vector[i];
+      for(int i = 0; i < total_n; i++) {
+
+      double x = vector[i];
+
+      /* Simula lavoro pesante. */
+      for(int j = 0; j < 50; j++) {
+        x = x * 1.000001;
+      }
+
+      serial_sum += (long long)x;
     }
+
 
     double finish_serial = MPI_Wtime();
 
@@ -115,10 +123,19 @@ int main(int argc, char* argv[]) {
     MPI_COMM_WORLD
   );
 
+  /* VERSIONE PARALLELA. */
   long long local_sum = 0;
 
   for(int i = 0; i < LOCAL_N; i++) {
-    local_sum += local_vector[i];
+
+    double x = local_vector[i];
+
+    /* Simula lavoro pesante. */
+    for(int j = 0; j < 50; j++) {
+      x = x * 1.000001;
+    }
+
+    local_sum += (long long)x;
   }
 
   long long global_sum;
