@@ -1,12 +1,12 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 4 ./12_broadcast
+ *   mpiexec -n 4 ./12_broadcast_mpi
  *
  * Utilizzeremo:
  *
- *    rank 0 --> genera un valore
- *    tutti gli altri processi --> ricevono lo stesso valore
+ *   rank 0 --> genera un valore
+ *   tutti gli altri processi --> ricevono lo stesso valore
  *
  * L'obiettivo è mostrare come MPI_Bcast permetta di distribuire lo
  * stesso dato a tutti i processi del communicator.
@@ -38,7 +38,8 @@ int main(int argc, char* argv[]) {
 
   int value;
 
-  /* Solo il processo root inizializza il dato. */
+  /* Solo il processo root inizializza il dato.
+   */
   if(my_rank == 0) {
 
     value = 42;
@@ -54,7 +55,8 @@ int main(int argc, char* argv[]) {
    * - 1              : numero di elementi;
    * - MPI_INT        : tipo di dato;
    * - 0              : processo root;
-   * - MPI_COMM_WORLD : communicator. */
+   * - MPI_COMM_WORLD : communicator.
+   */
   MPI_Bcast(
     &value,
     1,

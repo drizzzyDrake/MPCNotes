@@ -1,12 +1,13 @@
 /* NOTE -------------------------------------------------------------------
+ * 
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 2 ./08_deadlock
+ *   mpiexec -n 2 ./08_deadlock_mpi
  *
  * Utilizzeremo:
  *
- *    rank 0 --> invia e poi riceve
- *    rank 1 --> invia e poi riceve
+ *   rank 0 --> invia e poi riceve
+ *   rank 1 --> invia e poi riceve
  *
  * L'obiettivo è mostrare come lo stesso identico schema di comunicazione
  * possa funzionare con messaggi piccoli ma andare in deadlock con messaggi
@@ -23,13 +24,13 @@
  *
  * Processo 0:
  *
- *    MPI_Send(...)
- *    MPI_Recv(...)
+ *   MPI_Send(...)
+ *   MPI_Recv(...)
  *
  * Processo 1:
  *
- *    MPI_Send(...)
- *    MPI_Recv(...)
+ *   MPI_Send(...)
+ *   MPI_Recv(...)
  *
  * Se entrambe le MPI_Send attendono che il destinatario esegua la relativa
  * MPI_Recv, nessuno dei due processi potrà mai raggiungere la ricezione. Entrambi
@@ -43,12 +44,14 @@ int main(int argc, char* argv[]) {
 
   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
-  /* ESEMPIO 1 ------------------------------------------------------------
+  /* ESEMPIO 1
+   *
    * Messaggi piccoli:
+   *
    * In molte implementazioni MPI questo esempio termina correttamente perché
    * il protocollo Eager permette di completare la MPI_Send copiando il dato
    * in un buffer interno.
-   * -------------------------------------------------------------------- */
+   */
   if(my_rank == 0) {
 
     int value = 10;
@@ -106,17 +109,20 @@ int main(int argc, char* argv[]) {
   }
 
   /* Entrambi i processi devono terminare il primo esempio prima di iniziare
-   * il secondo. */
+   * il secondo.
+   */
   MPI_Barrier(MPI_COMM_WORLD);
 
-  /* ESEMPIO 2 ------------------------------------------------------------
+  /* ESEMPIO 2
+   *
    * Messaggi grandi:
+   *
    * Da questo punto in poi il programma potrebbe bloccarsi. È proprio questo
    * il comportamento che vogliamo osservare. Se l'implementazione MPI utilizza
    * il protocollo Rendezvous, entrambe le MPI_Send potrebbero attendere che
    * il destinatario esegua MPI_Recv, causando un deadlock. Per interrompere
    * l'esecuzione utilizzare CTRL+C.
-   * -------------------------------------------------------------------- */
+   */
   int size = 1000000;
 
   int* values = malloc(size * sizeof(int));
@@ -146,7 +152,8 @@ int main(int argc, char* argv[]) {
 
     /* Se compare questa stampa significa che MPI_Send è terminata.
      * In presenza di deadlock questa istruzione potrebbe non essere mai
-     * eseguita. */
+     * eseguita.
+     */
     printf("[Processo %d] Send completata (messaggio grande)\n", my_rank);
 
     MPI_Recv(
@@ -196,8 +203,8 @@ int main(int argc, char* argv[]) {
 /* RIASSUNTO --------------------------------------------------------------
  * Lo schema:
  *
- *    Send()
- *    Recv()
+ *   Send()
+ *   Recv()
  *
  * eseguito contemporaneamente da due processi NON è sempre sicuro.
  *
@@ -212,8 +219,8 @@ int main(int argc, char* argv[]) {
  *
  * Si crea quindi un'attesa circolare:
  *
- *    Processo 0 aspetta il Processo 1
- *    Processo 1 aspetta il Processo 0
+ *   Processo 0 aspetta il Processo 1
+ *   Processo 1 aspetta il Processo 0
  *
  * Nessuno dei due processi può proseguire e il programma rimane bloccato.
  *

@@ -1,11 +1,11 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 4 ./21_reduce_scatter
+ *   mpiexec -n 4 ./21_reduce_scatter_mpi
  *
  * Utilizzeremo:
  *
- *    tutti i processi --> possiedono un vettore locale
+ *   tutti i processi --> possiedono un vettore locale
  *
  * L'obiettivo è mostrare come MPI_Reduce_scatter combini una riduzione
  * e una distribuzione dei risultati in un'unica comunicazione collettiva.
@@ -22,7 +22,7 @@
  *
  * Dal punto di vista logico equivale a:
  *
- *    MPI_Reduce + MPI_Scatter
+ *   MPI_Reduce + MPI_Scatter
  *
  * Tuttavia MPI esegue entrambe le operazioni con un'unica comunicazione.
  */
@@ -36,7 +36,8 @@ int main(int argc, char* argv[]) {
   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &comm_sz);
 
-  /* Ogni processo possiede un vettore di 4 elementi. */
+  /* Ogni processo possiede un vettore di 4 elementi.
+   */
   int local_values[4];
 
   for(int i = 0; i < 4; i++) {
@@ -51,7 +52,8 @@ int main(int argc, char* argv[]) {
 
   printf("\n");
 
-  /* Ogni processo riceverà un elemento del risultato finale. */
+  /* Ogni processo riceverà un elemento del risultato finale.
+   */
   int recvcounts[4] = {1, 1, 1, 1};
 
   int result;
@@ -83,7 +85,7 @@ int main(int argc, char* argv[]) {
  *
  * Dal punto di vista logico:
  *
- *    MPI_Reduce_scatter  =  MPI_Reduce + MPI_Scatter
+ *   MPI_Reduce_scatter  =  MPI_Reduce + MPI_Scatter
  *
  * Questa operazione è molto utilizzata nelle librerie di Deep Learning
  * distribuito per sincronizzare gradienti e pesi in modo efficiente.

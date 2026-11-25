@@ -1,12 +1,12 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 4 ./23_wtime
+ *   mpiexec -n 4 ./23_wtime_mpi
  *
  * Utilizzeremo:
  *
- *    MPI_Barrier
- *    MPI_Wtime
+ *   MPI_Barrier
+ *   MPI_Wtime
  *
  * L'obiettivo è mostrare come misurare il tempo di esecuzione
  * di una sezione di codice parallela.
@@ -19,10 +19,10 @@
  *
  * Per misurare una porzione di codice:
  *
- *    start = MPI_Wtime();
- *    codice da misurare
- *    finish = MPI_Wtime();
- *    elapsed = finish - start;
+ *   start = MPI_Wtime();
+ *   codice da misurare
+ *   finish = MPI_Wtime();
+ *   elapsed = finish - start;
  */
 int main(int argc, char* argv[]) {
 
@@ -35,7 +35,8 @@ int main(int argc, char* argv[]) {
   /* Sincronizzazione iniziale.
    *
    * Tutti i processi aspettano che anche gli altri siano arrivati
-   * prima di iniziare la misura. */
+   * prima di iniziare la misura.
+   */
   MPI_Barrier(MPI_COMM_WORLD);
 
   double start = MPI_Wtime();
@@ -43,7 +44,8 @@ int main(int argc, char* argv[]) {
   /* Simuliamo un lavoro computazionale.
    *
    * Ogni processo esegue un numero diverso di operazioni,
-   * così possiamo osservare tempi differenti (lavoro fittizio). */
+   * così possiamo osservare tempi differenti (lavoro fittizio).
+   */
   volatile long long result = 0;
 
   for(long long i = 0; i < (my_rank + 1) * 100000000; i++) {
@@ -66,21 +68,21 @@ int main(int argc, char* argv[]) {
  *
  * Il tempo viene calcolato come:
  *
- *    elapsed = finish - start
+ *   elapsed = finish - start
  *
  * dove:
  *
- *    start  = MPI_Wtime() prima dell'operazione
- *    finish = MPI_Wtime() dopo l'operazione
+ *   start  = MPI_Wtime() prima dell'operazione
+ *   finish = MPI_Wtime() dopo l'operazione
  *
  * Prima di iniziare la misura è consigliabile utilizzare MPI_Barrier
  * per sincronizzare tutti i processi.
  *
  * In un programma parallelo ogni processo possiede un proprio tempo locale:
  *
- *    rank 0 --> elapsed0
- *    rank 1 --> elapsed1
- *    ...
+ *   rank 0 --> elapsed0
+ *   rank 1 --> elapsed1
+ *   ...
  *
  * Questi tempi possono essere differenti perché i processi possono
  * terminare in istanti diversi.
@@ -88,7 +90,7 @@ int main(int argc, char* argv[]) {
  * Il tempo complessivo dell'applicazione parallela non è dato dal tempo
  * medio o dal tempo di un singolo processo, ma dal processo più lento:
  *
- *    T_parallel = max(elapsed0, elapsed1, ..., elapsedp)
+ *   T_parallel = max(elapsed0, elapsed1, ..., elapsedp)
  *
  * Per ottenere questo valore globale si utilizza generalmente MPI_Reduce
  * con l'operazione MPI_MAX.

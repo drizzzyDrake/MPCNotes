@@ -1,13 +1,13 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 4 ./25_noise
+ *   mpiexec -n 4 ./25_noise_mpi
  *
  * Utilizzeremo:
  *
- *    MPI_Wtime
- *    MPI_Barrier
- *    MPI_Reduce con MPI_MAX
+ *   MPI_Wtime
+ *   MPI_Barrier
+ *   MPI_Reduce con MPI_MAX
  *
  * L'obiettivo è mostrare che il tempo di esecuzione parallelo varia tra
  * esecuzioni diverse a causa del rumore di sistema.
@@ -25,17 +25,20 @@ int main(int argc, char* argv[]) {
   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
   /* Ripetiamo più volte la stessa misura perché una singola esecuzione
-   * potrebbe essere influenzata dal rumore di sistema. */
+   * potrebbe essere influenzata dal rumore di sistema.
+   */
   int executions = 5;
 
   for(int e = 0; e < executions; e++) {
 
-    /* Sincronizziamo i processi prima di ogni misura. */
+    /* Sincronizziamo i processi prima di ogni misura. 
+     */
     MPI_Barrier(MPI_COMM_WORLD);
 
     double start = MPI_Wtime();
 
-    /* Simuliamo il lavoro. */
+    /* Simuliamo il lavoro. 
+     */
     volatile long long result = 0;
 
     for(long long i = 0; i < 100000000; i++) {
@@ -46,7 +49,8 @@ int main(int argc, char* argv[]) {
     double local_elapsed = finish - start;
     double max_elapsed;
 
-    /* Il tempo dell'applicazione è il massimo tra tutti i processi.*/
+    /* Il tempo dell'applicazione è il massimo tra tutti i processi.
+     */
     MPI_Reduce(
       &local_elapsed,
       &max_elapsed,
@@ -93,7 +97,7 @@ int main(int argc, char* argv[]) {
  *
  * Poiché il tempo parallelo è determinato dal processo più lento:
  *
- *    T_parallel = max(tempi locali)
+ *   T_parallel = max(tempi locali)
  *
  * un singolo processo rallentato può aumentare il tempo totale
  * dell'applicazione.

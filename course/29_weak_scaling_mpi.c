@@ -19,8 +19,8 @@
  *
  * Vengono calcolati anche:
  *
- *   - Speedup scalato
- *   - Efficienza
+ * - Speedup scalato
+ * - Efficienza
  * ---------------------------------------------------------------------- */
 
 #include <stdio.h>
@@ -40,7 +40,8 @@ int main(int argc, char* argv[]) {
   MPI_Comm_size(MPI_COMM_WORLD, &comm_sz);
 
   /* La dimensione totale cresce con il numero di processi.
-   * Ogni processo riceve sempre LOCAL_N elementi. */
+   * Ogni processo riceve sempre LOCAL_N elementi. 
+   */
   int total_n = LOCAL_N * comm_sz;
 
   int* vector = NULL;
@@ -63,7 +64,8 @@ int main(int argc, char* argv[]) {
    *      N = LOCAL_N * numero processi
    *
    * In questo modo confrontiamo il tempo necessario
-   * per risolvere lo stesso problema in modo sequenziale. */
+   * per risolvere lo stesso problema in modo sequenziale. 
+   */
   if(my_rank == 0) {
 
     long long serial_sum = 0;
@@ -74,7 +76,8 @@ int main(int argc, char* argv[]) {
 
       double x = vector[i];
 
-      /* Simula lavoro pesante. */
+      /* Simula lavoro pesante.
+       */
       for(int j = 0; j < 50; j++) {
         x = x * 1.000001;
       }
@@ -91,7 +94,8 @@ int main(int argc, char* argv[]) {
     printf("Tempo sequenziale: %.6f secondi\n\n", serial_time);
   }
 
-  /* Comunichiamo il tempo sequenziale a tutti i processi. */
+  /* Comunichiamo il tempo sequenziale a tutti i processi.
+   */
   MPI_Bcast(
     &serial_time,
     1,
@@ -102,7 +106,8 @@ int main(int argc, char* argv[]) {
 
   int* local_vector = malloc(LOCAL_N * sizeof(int));
 
-  /* Sincronizzazione prima della misura. */
+  /* Sincronizzazione prima della misura. 
+   */
   MPI_Barrier(MPI_COMM_WORLD);
 
   double start = MPI_Wtime();
@@ -111,7 +116,8 @@ int main(int argc, char* argv[]) {
    *
    *   LOCAL_N
    *
-   * Cambia solo il numero totale di elementi. */
+   * Cambia solo il numero totale di elementi. 
+   */
   MPI_Scatter(
     vector,
     LOCAL_N,
@@ -123,14 +129,16 @@ int main(int argc, char* argv[]) {
     MPI_COMM_WORLD
   );
 
-  /* VERSIONE PARALLELA. */
+  /* VERSIONE PARALLELA.
+   */
   long long local_sum = 0;
 
   for(int i = 0; i < LOCAL_N; i++) {
 
     double x = local_vector[i];
 
-    /* Simula lavoro pesante. */
+    /* Simula lavoro pesante.
+     */
     for(int j = 0; j < 50; j++) {
       x = x * 1.000001;
     }
@@ -154,7 +162,8 @@ int main(int argc, char* argv[]) {
   double local_elapsed = finish - start;
   double parallel_time;
 
-  /* Il tempo totale è determinato dal processo più lento. */
+  /* Il tempo totale è determinato dal processo più lento.
+   */
   MPI_Reduce(
     &local_elapsed,
     &parallel_time,

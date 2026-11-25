@@ -1,18 +1,18 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 4 ./18_vector_sum
+ *   mpiexec -n 4 ./18_vector_sum_mpi
  *
  * Utilizzeremo:
  *
- *    rank 0 --> possiede i vettori completi
- *    tutti i processi --> calcolano una parte della somma
- *    rank 0 --> raccoglie il risultato finale
+ *   rank 0           --> possiede i vettori completi
+ *   tutti i processi --> calcolano una parte della somma
+ *   rank 0           --> raccoglie il risultato finale
  *
  * L'obiettivo è mostrare come MPI_Scatter e MPI_Gather possano essere
  * utilizzati per parallelizzare un problema semplice:
  *
- *      C = A + B
+ *     C = A + B
  *
  * Ogni processo lavora solamente su una porzione dei vettori.
  * ---------------------------------------------------------------------- */
@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
  *
  * In questo esempio:
  *
- *      Processo 0 --> Scatter --> calcolo locale --> Gather --> processo 0
+ *     Processo 0 --> Scatter --> calcolo locale --> Gather --> processo 0
  *
  * Vantaggi:
  *
@@ -154,6 +154,6 @@ int main(int argc, char* argv[]) {
  *
  * Per gestire dimensioni non divisibili si utilizzano:
  *
- *      MPI_Scatterv
- *      MPI_Gatherv
+ *     MPI_Scatterv
+ *     MPI_Gatherv
  * ---------------------------------------------------------------------- */

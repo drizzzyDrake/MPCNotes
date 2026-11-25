@@ -1,12 +1,12 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 4 ./15_gather
+ *   mpiexec -n 4 ./15_gather_mpi
  *
  * Utilizzeremo:
  *
- *    tutti i processi --> possiedono una porzione di un vettore
- *    rank 0           --> raccoglie tutte le porzioni
+ *   tutti i processi --> possiedono una porzione di un vettore
+ *   rank 0           --> raccoglie tutte le porzioni
  *
  * L'obiettivo è mostrare come MPI_Gather raccolga dati provenienti da
  * tutti i processi in un unico buffer sul processo root.
@@ -37,7 +37,8 @@ int main(int argc, char* argv[]) {
   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &comm_sz);
 
-  /* Ogni processo possiede due elementi. */
+  /* Ogni processo possiede due elementi. 
+   */
   int local_values[2];
 
   local_values[0] = my_rank * 2;
@@ -45,7 +46,8 @@ int main(int argc, char* argv[]) {
 
   printf("[Processo %d] Valori locali: %d %d\n", my_rank, local_values[0], local_values[1]);
 
-  /* Il buffer completo esiste solo sul processo root. */
+  /* Il buffer completo esiste solo sul processo root. 
+   */
   int values[8];
 
   /* Parametri:
@@ -57,7 +59,8 @@ int main(int argc, char* argv[]) {
    * - 2               : elementi ricevuti da ogni processo;
    * - MPI_INT         : tipo del buffer di ricezione;
    * - 0               : processo root;
-   * - MPI_COMM_WORLD  : communicator. */
+   * - MPI_COMM_WORLD  : communicator. 
+   */
   MPI_Gather(
     local_values,
     2,

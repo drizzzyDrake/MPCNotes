@@ -1,11 +1,11 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 4 ./16_allgather
+ *   mpiexec -n 4 ./16_allgather_mpi
  *
  * Utilizzeremo:
  *
- *    tutti i processi --> possiedono una porzione di un vettore
+ *   tutti i processi --> possiedono una porzione di un vettore
  *
  * L'obiettivo è mostrare come MPI_Allgather raccolga i dati provenienti
  * da tutti i processi e distribuisca automaticamente il risultato a
@@ -20,7 +20,7 @@
  * 
  * Dal punto di vista logico equivale a:
  *
- *    MPI_Gather + MPI_Bcast
+ *   MPI_Gather + MPI_Bcast
  *
  * Tuttavia MPI_Allgather viene implementata direttamente da MPI
  * utilizzando algoritmi ottimizzati.
@@ -36,7 +36,8 @@ int main(int argc, char* argv[]) {
 
   MPI_Comm_size(MPI_COMM_WORLD, &comm_sz);
 
-  /* Ogni processo possiede due elementi. */
+  /* Ogni processo possiede due elementi.
+   */
   int local_values[2];
 
   local_values[0] = my_rank * 2;
@@ -57,7 +58,8 @@ int main(int argc, char* argv[]) {
    * - values          : buffer di ricezione;
    * - 2               : elementi ricevuti da ogni processo;
    * - MPI_INT         : tipo del buffer di ricezione;
-   * - MPI_COMM_WORLD  : communicator. */
+   * - MPI_COMM_WORLD  : communicator. 
+   */
   MPI_Allgather(
     local_values,
     2,
@@ -91,7 +93,7 @@ int main(int argc, char* argv[]) {
  *
  * Dal punto di vista logico:
  *
- *    MPI_Allgather = MPI_Gather + MPI_Bcast
+ *   MPI_Allgather = MPI_Gather + MPI_Bcast
  *
  * A differenza di MPI_Gather, dove olo il root riceve il buffer completo,
  * con MPI_Allgather tutti i processi ricevono il buffer completo.

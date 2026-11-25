@@ -1,22 +1,46 @@
-CC = mpicc
+MPICC = mpicc
+CC = gcc
+
 CFLAGS = -Wall -Wextra -O2
+OMPFLAGS = -fopenmp
+
 LDFLAGS = -lm
 
-# Trova automaticamente tutti i file .c nella directory
-SRCS = $(wildcard *.c)
+# Trova automaticamente i sorgenti
+MPI_SRCS = $(wildcard *_mpi.c)
+OMP_SRCS = $(wildcard *_omp.c)
+C_SRCS   = $(filter-out $(MPI_SRCS) $(OMP_SRCS), $(wildcard *.c))
 
-# Genera i nomi degli eseguibili rimuovendo l'estensione .c
-TARGETS = $(SRCS:.c=)
+# Genera gli eseguibili togliendo .c
+MPI_TARGETS = $(MPI_SRCS:.c=)
+OMP_TARGETS = $(OMP_SRCS:.c=)
+C_TARGETS   = $(C_SRCS:.c=)
 
-.PHONY: all clean
+.PHONY: all mpi openmp c clean
 
-# Compila tutti gli eseguibili (target predefinito)
-all: $(TARGETS)
+# Compila tutto
+all: mpi openmp c
 
-# Regola generica per compilare ogni singolo file .c nel rispettivo eseguibile
+# Solo MPI
+mpi: $(MPI_TARGETS)
+
+# Solo OpenMP
+openmp: $(OMP_TARGETS)
+
+# Solo C semplice
+c: $(C_TARGETS)
+
+# Regola compilazione MPI
+%_mpi: %_mpi.c
+	$(MPICC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
+# Regola compilazione OpenMP
+%_omp: %_omp.c
+	$(CC) $(CFLAGS) $(OMPFLAGS) $< -o $@ $(LDFLAGS)
+
+# Regola compilazione C normale
 %: %.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
-# Rimuove tutti gli eseguibili compilati
 clean:
-	rm -f $(TARGETS)
+	rm -f $(MPI_TARGETS) $(OMP_TARGETS) $(C_TARGETS)

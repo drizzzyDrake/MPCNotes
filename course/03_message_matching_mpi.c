@@ -1,13 +1,13 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 3 ./03_message_matching
+ *   mpiexec -n 3 ./03_message_matching_mpi
  *
  * Utilizzeremo:
  *
- *    rank 0 --> invia un messaggio con tag 10
- *    rank 1 --> invia un messaggio con tag 20
- *    rank 2 --> riceve i messaggi
+ *   rank 0 --> invia un messaggio con tag 10
+ *   rank 1 --> invia un messaggio con tag 20
+ *   rank 2 --> riceve i messaggi
  *
  * L'obiettivo è mostrare come MPI stabilisce quale messaggio deve essere
  * associato ad una determinata MPI_Recv.
@@ -47,16 +47,18 @@ int main(int argc, char* argv[]) {
 
   /* Questo è lo schema dei tre processi:
    *
-   *    Processo 0 --- tag = 10 --> Processo 2
-   *    Processo 1 --- tag = 20 --> Processo 2
+   *   Processo 0 --- tag = 10 --> Processo 2
+   *   Processo 1 --- tag = 20 --> Processo 2
    *
    * Il processo 2 dovrà distinguere i due messaggi utilizzando il meccanismo
-   * di matching. */
+   * di matching.
+   */
   if(my_rank == 0) {
 
     int value = 10;
 
-    /* Processo 0 --- tag = 10 --> Processo 2 */
+    /* Processo 0 --- tag = 10 --> Processo 2.
+     */
     MPI_Send(
       &value,
       1,
@@ -73,7 +75,8 @@ int main(int argc, char* argv[]) {
 
     int value = 20;
 
-    /* Processo 1 --- tag = 20 --> Processo 2 */
+    /* Processo 1 --- tag = 20 --> Processo 2.
+     */
     MPI_Send(
       &value,
       1,
@@ -93,7 +96,8 @@ int main(int argc, char* argv[]) {
 
     /* Prima ricezione specifica: source = 0 e tag = 10. Se il processo 0 non 
      * ha ancora inviato il messaggio corretto, questa chiamata rimane bloccata
-     * anche se sono disponibili altri messaggi. */
+     * anche se sono disponibili altri messaggi.
+     */
     MPI_Recv(
       &value,
       1,
@@ -110,7 +114,8 @@ int main(int argc, char* argv[]) {
 
     /* Prima ricezione specifica: source = 1 e tag = 20. Se il processo 1 non 
      * ha ancora inviato il messaggio corretto, questa chiamata rimane bloccata
-     * anche se sono disponibili altri messaggi. */
+     * anche se sono disponibili altri messaggi.
+     */
     MPI_Recv(
       &value,
       1,
@@ -145,22 +150,22 @@ int main(int argc, char* argv[]) {
  *
  * Esempio:
  *
- *    MPI_Recv(
- *      buffer,
- *      count,
- *      MPI_INT,
- *      0,
- *      10,
- *      MPI_COMM_WORLD,
- *      &status
- *    );
+ *   MPI_Recv(
+ *     buffer,
+ *     count,
+ *     MPI_INT,
+ *     0,
+ *     10,
+ *     MPI_COMM_WORLD,
+ *     &status
+ *   );
  *
  * può ricevere solamente un messaggio:
  *
- *    - inviato dal processo 0;
- *    - con tag 10;
- *    - appartenente a MPI_COMM_WORLD;
- *    - contenente dati compatibili con MPI_INT.
+ * - inviato dal processo 0;
+ * - con tag 10;
+ * - appartenente a MPI_COMM_WORLD;
+ * - contenente dati compatibili con MPI_INT.
  *
  * Se nessun messaggio compatibile è disponibile, MPI_Recv rimane bloccata
  * fino a quando il messaggio corretto non arriva. Messaggi ricevuti da MPI 

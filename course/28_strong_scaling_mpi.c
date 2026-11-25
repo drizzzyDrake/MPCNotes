@@ -1,7 +1,7 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *   mpiexec -n p ./28_strong_scaling
+ *   mpiexec -n p ./28_strong_scaling_mpi
  *
  * dove p rappresenta il numero di processi utilizzati.
  *
@@ -18,8 +18,8 @@
  *
  * Vengono calcolati anche:
  *
- *   - Speedup
- *   - Efficienza
+ * - Speedup
+ * - Efficienza
  * ---------------------------------------------------------------------- */
 
 #include <stdio.h>
@@ -60,7 +60,8 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  /* VERSIONE SEQUENZIALE */
+  /* VERSIONE SEQUENZIALE.
+   */
   double serial_time = 0.0;
 
   if(my_rank == 0) {
@@ -72,7 +73,8 @@ int main(int argc, char* argv[]) {
 
     double x = vector[i];
 
-    /* Simula lavoro pesante. */
+    /* Simula lavoro pesante.
+     */
     for(int j = 0; j < 50; j++) {
       x = x * 1.000001;
     }
@@ -87,7 +89,8 @@ int main(int argc, char* argv[]) {
     printf("Tempo sequenziale: %.6f secondi\n\n", serial_time);
   }
 
-  /* Comunichiamo il tempo sequenziale a tutti i processi. */
+  /* Comunichiamo il tempo sequenziale a tutti i processi. 
+   */
   MPI_Bcast(
     &serial_time,
     1,
@@ -98,16 +101,18 @@ int main(int argc, char* argv[]) {
 
   int* local_vector = malloc(local_n * sizeof(int));
 
-  /* Sincronizziamo tutti i processi prima della misura parallela. */
+  /* Sincronizziamo tutti i processi prima della misura parallela.
+   */
   MPI_Barrier(MPI_COMM_WORLD);
 
   double start = MPI_Wtime();
 
   /* Distribuiamo sempre lo stesso problema:
    *
-   *      N = 40000000
+   *   N = 40000000
    *
-   * Cambia solamente il numero di processi. */
+   * Cambia solamente il numero di processi. 
+   */
   MPI_Scatter(
     vector,
     local_n,
@@ -119,14 +124,16 @@ int main(int argc, char* argv[]) {
     MPI_COMM_WORLD
   );
 
-  /* VERSIONE PARALLELA. */
+  /* VERSIONE PARALLELA. 
+   */
   long long local_sum = 0;
 
   for(int i = 0; i < local_n; i++) {
 
     double x = local_vector[i];
 
-    /* Simula lavoro pesante. */
+    /* Simula lavoro pesante. 
+     */
     for(int j = 0; j < 50; j++) {
       x = x * 1.000001;
     }

@@ -1,12 +1,12 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 4 ./11_reduce
+ *   mpiexec -n 4 ./11_reduce_mpi
  *
  * Utilizzeremo:
  *
- *    tutti i processi --> calcolano un valore locale
- *    rank 0           --> riceve il risultato della riduzione
+ *   tutti i processi --> calcolano un valore locale
+ *   rank 0           --> riceve il risultato della riduzione
  *
  * L'obiettivo è mostrare come MPI_Reduce permetta di combinare i dati
  * provenienti da tutti i processi tramite una singola comunicazione
@@ -23,8 +23,8 @@
  *
  * A differenza delle comunicazioni point-to-point:
  *
- *    MPI_Send
- *    MPI_Recv
+ *   MPI_Send
+ *   MPI_Recv
  *
  * tutti i processi del communicator devono chiamare MPI_Reduce.
  *
@@ -43,7 +43,8 @@ int main(int argc, char* argv[]) {
 
   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
-  /* Ogni processo genera un valore diverso. */
+  /* Ogni processo genera un valore diverso.
+   */
   int local_value = (my_rank + 1) * 10;
 
   printf("[Processo %d] Valore locale: %d\n", my_rank, local_value);
@@ -72,7 +73,8 @@ int main(int argc, char* argv[]) {
     MPI_COMM_WORLD
   );
 
-  /* Solo il processo root possiede il risultato finale. */
+  /* Solo il processo root possiede il risultato finale.
+   */
   if(my_rank == 0) {
 
     printf("\n[Processo %d] Somma globale: %d\n", my_rank, global_sum);
@@ -93,10 +95,10 @@ int main(int argc, char* argv[]) {
  * MPI combina automaticamente tutti i valori utilizzando
  * un'operazione, ad esempio:
  *
- *    MPI_SUM
- *    MPI_MAX
- *    MPI_MIN
- *    MPI_PROD
+ *   MPI_SUM
+ *   MPI_MAX
+ *   MPI_MIN
+ *   MPI_PROD
  *
  * Solo il processo root riceve il risultato finale.
  *

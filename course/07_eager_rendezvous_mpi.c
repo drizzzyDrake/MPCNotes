@@ -1,19 +1,18 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 2 ./07_eager_rendezvous
+ *   mpiexec -n 2 ./07_eager_rendezvous_mpi
  *
  * Utilizzeremo:
  *
- *    rank 0 --> invia due messaggi di dimensione differente
- *    rank 1 --> riceve entrambi i messaggi
+ *   rank 0 --> invia due messaggi di dimensione differente
+ *   rank 1 --> riceve entrambi i messaggi
  *
  * L'obiettivo è mostrare che MPI_Send può utilizzare internamente protocolli
  * differenti in base alla dimensione del messaggio:
  *
  * - Eager protocol
  * - Rendezvous protocol
- *
  * ---------------------------------------------------------------------- */
 
 #include <stdio.h>
@@ -53,14 +52,15 @@ int main(int argc, char* argv[]) {
 
   /* Questo esempio richiede esattamente due processi:
    *
-   *    Processo 0 -----------------> Processo 1
+   *   Processo 0 -----------------> Processo 1
    *
-   *    messaggio piccolo             ricezione
+   *   messaggio piccolo             ricezione
    *
-   *    messaggio grande              ricezione
+   *   messaggio grande              ricezione
    *
    * La scelta del protocollo utilizzato da MPI dipende dalla dimensione del
-   * messaggio e dalla soglia interna chiamata EAGER THRESHOLD. */
+   * messaggio e dalla soglia interna chiamata EAGER THRESHOLD.
+   */
   if(my_rank == 0) {
 
     int small_value = 42;
@@ -68,7 +68,8 @@ int main(int argc, char* argv[]) {
     /* Messaggio piccolo: per messaggi di dimensione ridotta MPI può utilizzare 
      * il protocollo Eager. Internamente il messaggio viene copiato in un buffer 
      * gestito da MPI. In questo modo il mittente può proseguire senza aspettare
-     * che il destinatario abbia già chiamato MPI_Recv. */
+     * che il destinatario abbia già chiamato MPI_Recv. 
+     */
     MPI_Send(
       &small_value,
       1,
@@ -82,7 +83,8 @@ int main(int argc, char* argv[]) {
 
     /* Messaggio grande: creiamo un array molto più grande rispetto al messaggio 
      * precedente. La dimensione è volutamente elevata per rappresentare un messaggio
-     * che potrebbe superare la eager threshold. */
+     * che potrebbe superare la eager threshold.
+     */
     int size = 1000000;
     int* large_values = malloc(size * sizeof(int));
 
@@ -95,16 +97,17 @@ int main(int argc, char* argv[]) {
      * Prima del trasferimento dei dati vengono scambiati messaggi di
      * controllo:
      *
-     *    RTS (Request To Send)
+     *   RTS (Request To Send)
      *
      * inviato dal mittente per chiedere il permesso di trasferire i dati.
      *
-     *    CTS (Clear To Send)
+     *   CTS (Clear To Send)
      *
      * inviato dal destinatario quando è pronto alla ricezione.
      *
      * Solo dopo questo handshake viene effettuato il trasferimento vero
-     * e proprio. */
+     * e proprio.
+     */
     MPI_Send(
       large_values,
       size,
@@ -127,7 +130,8 @@ int main(int argc, char* argv[]) {
     * ha utilizzato il protocollo Eager, è possibile che il messaggio sia già 
     * stato copiato in un buffer interno di MPI prima ancora che questa MPI_Recv
     * venga eseguita. Questo comportamento dipende dall'implementazione MPI e 
-    * non è garantito dallo standard. */
+    * non è garantito dallo standard.
+    */
     MPI_Recv(
       &small_value,
       1,
@@ -142,14 +146,16 @@ int main(int argc, char* argv[]) {
 
     /* Prepariamo un buffer sufficientemente grande per contenere il secondo
      * messaggio. La dimensione del buffer deve essere almeno pari al numero 
-     * di elementi che il mittente potrebbe inviare. */
+     * di elementi che il mittente potrebbe inviare.
+     */
     int size = 1000000;
     int* large_values = malloc(size * sizeof(int));
 
     /* Riceviamo il messaggio grande. Se il messaggio supera la eager threshold, 
      * molte implementazioni MPI possono utilizzare il protocollo Rendezvous. 
      * In questo caso il trasferimento dei dati può iniziare solamente quando
-     * il processo destinatario è pronto ad eseguire questa MPI_Recv. */
+     * il processo destinatario è pronto ad eseguire questa MPI_Recv. 
+     */
     MPI_Recv(
       large_values,
       size,
@@ -177,9 +183,9 @@ int main(int argc, char* argv[]) {
  * EAGER PROTOCOL:
  * Utilizzato per messaggi piccoli. Il mittente:
  *
- *    1) copia i dati in un buffer interno MPI;
- *    2) termina MPI_Send;
- *    3) il destinatario riceverà il messaggio successivamente.
+ *   1) copia i dati in un buffer interno MPI;
+ *   2) termina MPI_Send;
+ *   3) il destinatario riceverà il messaggio successivamente.
  *
  * Vantaggi:
  *
@@ -194,8 +200,8 @@ int main(int argc, char* argv[]) {
  * Utilizzato per messaggi grandi. Prima del trasferimento vengono scambiati 
  * messaggi di controllo:
  *
- *    RTS (Request To Send)
- *    CTS (Clear To Send)
+ *   RTS (Request To Send)
+ *   CTS (Clear To Send)
  *
  * Vantaggi:
  *

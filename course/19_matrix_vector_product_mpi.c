@@ -1,23 +1,23 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 4 ./19_matrix_vector_product
+ *   mpiexec -n 4 ./19_matrix_vector_product_mpi
  *
  * Utilizzeremo:
  *
- *    rank 0 --> possiede matrice A e vettore x completi
- *    tutti i processi --> calcolano alcune righe del prodotto
- *    rank 0 --> raccoglie il vettore risultato y
+ *   rank 0 --> possiede matrice A e vettore x completi
+ *   tutti i processi --> calcolano alcune righe del prodotto
+ *   rank 0 --> raccoglie il vettore risultato y
  *
  * L'obiettivo è mostrare come parallelizzare il prodotto:
  *
- *    y = A * x
+ *   y = A * x
  *
  * utilizzando:
  *
- *    MPI_Bcast
- *    MPI_Scatter
- *    MPI_Gather
+ *   MPI_Bcast
+ *   MPI_Scatter
+ *   MPI_Gather
  * ---------------------------------------------------------------------- */
 
 #include <stdio.h>
@@ -25,7 +25,7 @@
 
 /* Il prodotto matrice-vettore consiste nel calcolare:
  *
- *    y[i] = A[i][0]*x[0] + A[i][1]*x[1] + ...
+ *   y[i] = A[i][0]*x[0] + A[i][1]*x[1] + ...
  *
  * Ogni processo riceve alcune righe della matrice A.
  *
@@ -85,7 +85,8 @@ int main(int argc, char* argv[]) {
   /* Codice per tutti i processi:
    * Distribuzione del vettore x a tutti i processi. Ogni processo deve
    * conoscere tutto x perché ogni riga della matrice richiede tutti gli
-   * elementi del vettore. */
+   * elementi del vettore.
+   */
   MPI_Bcast(
     x,
     cols,
@@ -98,7 +99,8 @@ int main(int argc, char* argv[]) {
   int local_A[local_rows][cols];
   int local_y[local_rows];
 
-  /* Ogni processo riceve alcune righe della matrice A. */
+  /* Ogni processo riceve alcune righe della matrice A.
+   */
   MPI_Scatter(
     A,
     local_rows * cols,
@@ -110,7 +112,8 @@ int main(int argc, char* argv[]) {
     MPI_COMM_WORLD
   );
 
-  /* Calcolo locale del prodotto matrice-vettore. */
+  /* Calcolo locale del prodotto matrice-vettore. 
+   */
   for(int i = 0; i < local_rows; i++) {
     local_y[i] = 0;
 
@@ -127,7 +130,8 @@ int main(int argc, char* argv[]) {
 
   printf("\n");
 
-  /* Raccolta dei risultati sul processo root.*/
+  /* Raccolta dei risultati sul processo root.
+   */
   MPI_Gather(
     local_y,
     local_rows,
@@ -167,5 +171,5 @@ int main(int argc, char* argv[]) {
  *
  * Questo schema è molto utilizzato negli algoritmi paralleli:
  *
- *    distribuzione dati --> computazione locale --> raccolta risultati
+ *   distribuzione dati --> computazione locale --> raccolta risultati
  * ---------------------------------------------------------------------- */

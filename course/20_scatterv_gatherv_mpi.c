@@ -1,12 +1,12 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 4 ./20_scatterv_gatherv
+ *   mpiexec -n 4 ./20_scatterv_gatherv_mpi
  *
  * Utilizzeremo:
  *
- *    rank 0 --> possiede il vettore completo
- *    tutti i processi --> ricevono una quantità diversa di dati
+ *   rank 0 --> possiede il vettore completo
+ *   tutti i processi --> ricevono una quantità diversa di dati
  *
  * L'obiettivo è mostrare come MPI_Scatterv e MPI_Gatherv permettano
  * di gestire distribuzioni non uniformi dei dati.
@@ -36,7 +36,8 @@ int main(int argc, char* argv[]) {
   int sendcounts[4];
   int displacements[4];
 
-  /* Il processo root inizializza il vettore. */
+  /* Il processo root inizializza il vettore. 
+   */
   if(my_rank == 0) {
 
     for(int i = 0; i < n; i++) {
@@ -51,13 +52,15 @@ int main(int argc, char* argv[]) {
 
     printf("\n\n");
 
-    /* Numero di elementi assegnati ad ogni processo. */
+    /* Numero di elementi assegnati ad ogni processo. 
+     */
     sendcounts[0] = 3;
     sendcounts[1] = 3;
     sendcounts[2] = 2;
     sendcounts[3] = 2;
 
-    /* Posizione iniziale di ogni porzione. */
+    /* Posizione iniziale di ogni porzione.
+     */
     displacements[0] = 0;
     displacements[1] = 3;
     displacements[2] = 6;
@@ -65,11 +68,13 @@ int main(int argc, char* argv[]) {
   }
 
   /* Codice per tutti i processi:
-   * Ogni processo deve sapere quanti elementi riceverà. */
+   * Ogni processo deve sapere quanti elementi riceverà.
+   */
   int local_size;
 
   /* MPI_Scatter iniziale per distribuire local_size, così ogni
-   * processo sa quanti elementi deve allocare */
+   * processo sa quanti elementi deve allocare.
+   */
   MPI_Scatter(
     sendcounts,
     1,
@@ -83,7 +88,8 @@ int main(int argc, char* argv[]) {
 
   int local_values[local_size];
 
-  /* Distribuzione non uniforme del vettore. */
+  /* Distribuzione non uniforme del vettore. 
+   */
   MPI_Scatterv(
     values,
     sendcounts,
@@ -104,7 +110,8 @@ int main(int argc, char* argv[]) {
 
   printf("\n");
 
-  /* Raccolta con quantità variabili. */
+  /* Raccolta con quantità variabili. 
+   */
   MPI_Gatherv(
     local_values,
     local_size,
@@ -140,8 +147,8 @@ int main(int argc, char* argv[]) {
  * Quando il numero di dati non è divisibile per il numero di processi
  * si utilizzano:
  *
- *    MPI_Scatterv
- *    MPI_Gatherv
+ *   MPI_Scatterv
+ *   MPI_Gatherv
  *
  * MPI_Scatterv utilizza:
  *

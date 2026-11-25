@@ -1,12 +1,12 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 4 ./14_scatter
+ *   mpiexec -n 4 ./14_scatter_mpi
  *
  * Utilizzeremo:
  *
- *    rank 0 --> possiede un vettore
- *    tutti i processi --> ricevono una porzione del vettore
+ *   rank 0 --> possiede un vettore
+ *   tutti i processi --> ricevono una porzione del vettore
  *
  * L'obiettivo è mostrare come MPI_Scatter distribuisca parti diverse
  * dello stesso buffer ai vari processi.
@@ -39,7 +39,8 @@ int main(int argc, char* argv[]) {
 
   MPI_Comm_size(MPI_COMM_WORLD, &comm_sz);
 
-  /* Il vettore completo esiste solo sul processo root. */
+  /* Il vettore completo esiste solo sul processo root. 
+   */
   int values[8];
 
   if(my_rank == 0) {
@@ -57,7 +58,8 @@ int main(int argc, char* argv[]) {
     printf("\n\n");
   }
 
-  /* Ogni processo riceverà due elementi. */
+  /* Ogni processo riceverà due elementi. 
+   */
   int local_values[2];
 
   /* Parametri:
@@ -69,7 +71,8 @@ int main(int argc, char* argv[]) {
    * - 2               : elementi ricevuti;
    * - MPI_INT         : tipo del buffer di ricezione;
    * - 0               : processo root;
-   * - MPI_COMM_WORLD  : communicator. */
+   * - MPI_COMM_WORLD  : communicator. 
+   */
   MPI_Scatter(
     values,
     2,

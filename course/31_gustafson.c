@@ -9,9 +9,9 @@
  *
  * L'obiettivo è mostrare:
  *
- *   - la differenza rispetto alla legge di Amdahl;
- *   - lo speedup scalato;
- *   - il comportamento del Weak Scaling.
+ * - la differenza rispetto alla legge di Amdahl;
+ * - lo speedup scalato;
+ * - il comportamento del Weak Scaling.
  * ---------------------------------------------------------------------- */
 
 #include <stdio.h>
@@ -25,7 +25,8 @@ int main() {
    *   alpha = 0.1
    *
    * significa che il 10% del lavoro rimane sequenziale,
-   * mentre il restante 90% può essere parallelizzato. */
+   * mentre il restante 90% può essere parallelizzato.
+   */
   double alpha = 0.1;
 
   /* Numero di processi utilizzati.

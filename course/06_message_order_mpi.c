@@ -1,12 +1,12 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 2 ./06_message_order
+ *   mpiexec -n 2 ./06_message_order_mpi 
  *
  * Utilizzeremo:
  *
- *    rank 0 --> invia due messaggi consecutivi
- *    rank 1 --> riceve i due messaggi
+ *   rank 0 --> invia due messaggi consecutivi
+ *   rank 1 --> riceve i due messaggi
  *
  * L'obiettivo è mostrare la proprietà di ordinamento dei messaggi MPI,
  * chiamata non-overtaking property.
@@ -28,13 +28,13 @@
  *
  * Processo 0:
  *
- *    Send(A)
- *    Send(B)
+ *   Send(A)
+ *   Send(B)
  *
  * Processo 1:
  *
- *    Recv()
- *    Recv()
+ *   Recv()
+ *   Recv()
  *
  * La prima ricezione restituirà sempre A e la seconda sempre B. MPI non 
  * permette che il secondo messaggio "sorpassi" il primo. Questa proprietà 
@@ -52,20 +52,21 @@ int main(int argc, char* argv[]) {
 
   /* Questo esempio richiede esattamente due processi:
    *
-   *    Processo 0 -----------------> Processo 1
+   *   Processo 0 -----------------> Processo 1
    *
-   *    invia due messaggi            riceve due messaggi
+   *   invia due messaggi            riceve due messaggi
    *
    * Entrambi i messaggi utilizzano lo stesso tag. L'ordine di ricezione dipende 
-   * quindi dalla proprietà non-overtaking di MPI. */
-
+   * quindi dalla proprietà non-overtaking di MPI.
+   */
   if(my_rank == 0) {
 
     int first_value = 10;
     int second_value = 20;
 
     /* Primo messaggio inviato. Questo messaggio viene inserito nella sequenza 
-     * di comunicazione prima del secondo messaggio. */
+     * di comunicazione prima del secondo messaggio.
+     */
     MPI_Send(
       &first_value,
       1,
@@ -83,7 +84,8 @@ int main(int argc, char* argv[]) {
      * - tag;
      * - tipo di dato.
      *
-     * Per questo motivo MPI deve mantenere l'ordine rispetto al primo messaggio. */
+     * Per questo motivo MPI deve mantenere l'ordine rispetto al primo messaggio.
+     */
     MPI_Send(
       &second_value,
       1,
@@ -102,7 +104,8 @@ int main(int argc, char* argv[]) {
 
     /* Prima ricezione. Nonostante non specifichiamo quale messaggio ricevere, 
      * MPI sceglierà il primo messaggio inviato dal processo 0 compatibile con 
-     * questa ricezione. */
+     * questa ricezione.
+     */
     MPI_Recv(
       &value,
       1,
@@ -116,7 +119,8 @@ int main(int argc, char* argv[]) {
     printf("[Processo %d] Primo valore ricevuto: %d\n", my_rank, value);
 
     /* Seconda ricezione. Grazie alla non-overtaking property questo messaggio 
-     * sarà il secondo inviato dal processo 0. */
+     * sarà il secondo inviato dal processo 0.
+     */
     MPI_Recv(
       &value,
       1,
@@ -138,10 +142,10 @@ int main(int argc, char* argv[]) {
 /* RIASSUNTO --------------------------------------------------------------
  * La non-overtaking property garantisce che:
  *
- *    stesso mittente
- *    stesso destinatario
- *    stesso communicator
- *    stesso tag
+ *   stesso mittente
+ *   stesso destinatario
+ *   stesso communicator
+ *   stesso tag
  *
  * mantengano l'ordine dei messaggi.
  *
@@ -149,29 +153,29 @@ int main(int argc, char* argv[]) {
  *
  * Processo 0:
  *
- *    Send(A)
- *    Send(B)
+ *   Send(A)
+ *   Send(B)
  *
  * Processo 1:
  *
- *    Receive()
- *    Receive()
+ *   Receive()
+ *   Receive()
  *
  * Risultato garantito:
  *
- *    Receive() -> A
- *    Receive() -> B
+ *   Receive() -> A
+ *   Receive() -> B
  *
  * Attenzione: MPI NON garantisce l'ordine tra messaggi inviati da processi
  * DIFFERENTI.
  *
  * Esempio:
  *
- *    Processo 0 -----
- *                    *
- *                    * ---> Processo 2
- *                    *
- *    Processo 1 -----*
+ *   Processo 0 -----
+ *                   *
+ *                   * ---> Processo 2
+ *                   *
+ *   Processo 1 -----*
  *
  * Il processo 2 potrebbe ricevere prima il messaggio del processo 0 oppure
  * quello del processo 1, perché dipende dall'esecuzione del sistema.

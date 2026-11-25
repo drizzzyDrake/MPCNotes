@@ -5,8 +5,8 @@
  *
  * Mostriamo due modi diversi di allocare una matrice dinamica.
  *
- * 1) int**  -> ogni riga viene allocata separatamente.
- * 2) int*   -> tutta la matrice occupa un unico blocco contiguo.
+ *   1) int**  -> ogni riga viene allocata separatamente.
+ *   2) int*   -> tutta la matrice occupa un unico blocco contiguo.
  *
  * L'obiettivo è mostrare perché le comunicazioni collettive MPI richiedono
  * generalmente memoria contigua.
@@ -22,7 +22,8 @@ int main() {
 
   printf("\nMATRICE NON CONTIGUA:\n\n");
 
-  /* Ogni riga viene allocata separatamente. */
+  /* Ogni riga viene allocata separatamente. 
+   */
   int** matrix = malloc(rows * sizeof(int*));
 
   for(int i = 0; i < rows; i++) {
@@ -35,7 +36,8 @@ int main() {
  
   printf("\nMATRICE CONTIGUA:\n\n");
 
-  /* Tutta la matrice occupa un unico blocco di memoria. */
+  /* Tutta la matrice occupa un unico blocco di memoria. 
+   */
   int* matrix_contiguous = malloc(rows * cols * sizeof(int));
 
   for(int i = 0; i < rows; i++) {

@@ -1,11 +1,32 @@
-Compilation:
+Compilation MPI:
 
 mpicc -g -Wall file_name.c -o file_name
 
-Execution:
+Execution MPI:
 
 mpiexec -n <number of processes> ./file_name
 
-Debugging
 
-mpiexec -n <number of processes> ./test : -n 1 ddd ./test : -n 1 ./test
+Compilation OpenMP:
+
+gcc -g -Wall -fopenmp file_name.c -o file_name
+
+Execution OpenMP:
+
+OMP_NUM_THREADS=<number of threads> ./file_name
+
+
+Debugging MPI:
+
+Eseguire con un solo processo:
+
+mpiexec -n 1 ./file_name
+
+
+Debugging OpenMP:
+
+Eseguire con un solo thread:
+
+OMP_NUM_THREADS=1 ./file_name
+
+

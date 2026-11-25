@@ -1,7 +1,7 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *   mpiexec -n 4 ./27_efficiency
+ *   mpiexec -n 4 ./26_speedup_mpi
  *
  * Utilizzeremo:
  *
@@ -10,8 +10,8 @@
  *   MPI_Barrier
  *   MPI_Wtime
  *
- * L'obiettivo è mostrare come calcolare l'efficienza di un programma
- * parallelo a partire dallo speedup ottenuto.
+ * L'obiettivo è mostrare come calcolare lo speedup confrontando
+ * l'esecuzione sequenziale e quella parallela dello stesso algoritmo.
  * ---------------------------------------------------------------------- */
 
 #include <stdio.h>
@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
   }
 
   int local_n = N / comm_sz;
+
   int* vector = NULL;
 
   if(my_rank == 0) {
@@ -54,7 +55,8 @@ int main(int argc, char* argv[]) {
 
   int* local_vector = malloc(local_n * sizeof(int));
 
-  /* VERSIONE SEQUENZIALE */
+  /* VERSIONE SEQUENZIALE.
+   */
 
   double serial_time = 0.0;
 
@@ -76,7 +78,8 @@ int main(int argc, char* argv[]) {
     printf("Tempo sequenziale: %.6f secondi\n\n", serial_time);
   }
 
-  /* Tutti i processi devono conoscere il tempo sequenziale. */
+  /* tutti i processi devono conoscere il tempo seriale. 
+   */
   MPI_Bcast(
     &serial_time,
     1,
@@ -85,13 +88,15 @@ int main(int argc, char* argv[]) {
     MPI_COMM_WORLD
   );
 
-  /* VERSIONE PARALLELA */
+  /* VERSIONE PARALLELA.
+   */
 
   MPI_Barrier(MPI_COMM_WORLD);
 
   double start = MPI_Wtime();
 
-  /* Distribuiamo il vettore tra i processi. */
+  /* Distribuiamo il vettore tra i processi.
+   */
   MPI_Scatter(
     vector,
     local_n,
@@ -103,14 +108,16 @@ int main(int argc, char* argv[]) {
     MPI_COMM_WORLD
   );
 
-  /* Ogni processo calcola la propria somma locale. */
+  /* Ogni processo calcola la propria somma locale. 
+   */
   long long local_sum = 0;
 
   for(int i = 0; i < local_n; i++) {
     local_sum += local_vector[i];
   }
 
-  /* Sommiamo tutti i risultati locali. */
+  /* Sommiamo tutti i risultati locali. 
+   */
   long long global_sum;
 
   MPI_Reduce(
@@ -127,7 +134,8 @@ int main(int argc, char* argv[]) {
   double local_elapsed = finish - start;
   double parallel_time;
 
-  /* Il tempo dell'applicazione è quello del processo più lento. */
+  /* Il tempo dell'applicazione è quello del processo più lento.
+   */
   MPI_Reduce(
     &local_elapsed,
     &parallel_time,
@@ -140,17 +148,11 @@ int main(int argc, char* argv[]) {
 
   if(my_rank == 0) {
 
-    /* Calcoliamo lo speedup. */
     double speedup = serial_time / parallel_time;
-
-    /* L'efficienza misura quanto bene vengono utilizzati i processi
-     * disponibili. */
-    double efficiency = speedup / comm_sz;
 
     printf("Somma parallela : %lld\n", global_sum);
     printf("Tempo parallelo : %.6f secondi\n", parallel_time);
     printf("Speedup         : %.3f\n", speedup);
-    printf("Efficienza      : %.3f (%.2f%%)\n", efficiency, efficiency * 100.0);
   }
 
   free(local_vector);
@@ -165,56 +167,38 @@ int main(int argc, char* argv[]) {
 }
 
 /* RIASSUNTO --------------------------------------------------------------
- * L'efficienza misura quanto bene vengono sfruttate le risorse di calcolo
- * disponibili durante l'esecuzione parallela.
+ * Lo speedup misura il miglioramento ottenuto utilizzando il parallelismo.
  *
- * La formula è:
- *
- *              S(n,p)
- *   E(n,p) = ---------
- *                p
- *
- * oppure:
- *
- *                T_serial(n)
- *   E(n,p) = --------------------
- *            p * T_parallel(n,p)
+ *              T_serial(n)
+ *   S(n,p) = ----------------
+ *            T_parallel(n,p)
  *
  * dove:
  *
- *   S(n,p)          : speedup.
  *   T_serial(n)     : tempo della versione sequenziale.
  *   T_parallel(n,p) : tempo della versione parallela con p processi.
- *   p               : numero di processi.
  *
- * Il valore ideale è:
+ * Per ottenere una misura corretta è fondamentale confrontare
+ * la stessa applicazione nelle due versioni.
  *
- *   E(n,p) = 1
+ * In questo esempio:
  *
- * cioè ogni processo contribuisce completamente all'accelerazione
- * del programma.
+ * - la versione sequenziale somma l'intero vettore;
+ * - la versione parallela divide il vettore tra tutti i processi con
+ *   MPI_Scatter;
+ * - ogni processo calcola una somma locale;
+ * - MPI_Reduce con MPI_SUM ricostruisce la somma finale;
+ * - MPI_Reduce con MPI_MAX individua il tempo reale dell'applicazione
+ *   parallela.
  *
- * Nella pratica:
+ * Lo speedup ideale è:
  *
- *   E(n,p) <= 1
+ *   S(n,p) = p
  *
- * a causa di:
+ * Nella pratica risulta generalmente inferiore a causa di:
  *
  * - comunicazioni;
  * - sincronizzazioni;
- * - overhead della parallelizzazione;
+ * - overhead di MPI;
  * - parti non parallelizzabili.
- *
- * Ad esempio:
- *
- *   Speedup = 3.2
- *   Processi = 4
- *
- *   Efficienza = 3.2 / 4 = 0.8 = 80%
- *
- * Questo significa che il programma sfrutta circa l'80% del potenziale
- * teorico dei quattro processi disponibili.
- *
- * All'aumentare del numero di processi, mantenendo fissa la dimensione
- * del problema, l'efficienza tende generalmente a diminuire.
  * ---------------------------------------------------------------------- */

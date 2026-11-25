@@ -1,11 +1,11 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 4 ./13_allreduce
+ *   mpiexec -n 4 ./13_allreduce_mpi
  *
  * Utilizzeremo:
  *
- *    tutti i processi --> calcolano un valore locale
+ *   tutti i processi --> calcolano un valore locale
  *
  * L'obiettivo è mostrare come MPI_Allreduce permetta di combinare i dati
  * provenienti da tutti i processi e distribuire automaticamente il
@@ -21,7 +21,7 @@
  *
  * Dal punto di vista logico equivale a:
  *
- *    MPI_Reduce + MPI_Bcast
+ *   MPI_Reduce + MPI_Bcast
  *
  * Tuttavia MPI_Allreduce viene implementata direttamente da MPI
  * utilizzando algoritmi ottimizzati, evitando di eseguire due
@@ -52,7 +52,8 @@ int main(int argc, char* argv[]) {
    * - 1              : numero di elementi;
    * - MPI_INT        : tipo di dato;
    * - MPI_SUM        : operazione da applicare;
-   * - MPI_COMM_WORLD : communicator. */
+   * - MPI_COMM_WORLD : communicator.
+   */
   MPI_Allreduce(
     &local_value,
     &global_sum,
@@ -81,7 +82,7 @@ int main(int argc, char* argv[]) {
  *
  * Dal punto di vista logico:
  *
- *    MPI_Allreduce = MPI_Reduce + MPI_Bcast
+ *   MPI_Allreduce = MPI_Reduce + MPI_Bcast
  *
  * ma MPI può utilizzare implementazioni più efficienti rispetto
  * all'esecuzione separata delle due operazioni.

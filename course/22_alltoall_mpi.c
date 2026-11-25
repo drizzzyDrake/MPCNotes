@@ -1,11 +1,11 @@
 /* NOTE -------------------------------------------------------------------
  * Questo esempio è pensato per essere eseguito con:
  *
- *    mpiexec -n 4 ./22_alltoall
+ *   mpiexec -n 4 ./22_alltoall_mpi
  *
  * Utilizzeremo:
  *
- *    tutti i processi --> inviano un dato a tutti gli altri processi
+ *   tutti i processi --> inviano un dato a tutti gli altri processi
  *
  * L'obiettivo è mostrare come MPI_Alltoall permetta ad ogni processo di
  * inviare dati differenti a tutti gli altri processi in un'unica
@@ -34,7 +34,8 @@ int main(int argc, char* argv[]) {
   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &comm_sz);
 
-  /* Ogni processo prepara un valore destinato ad ogni processo. */
+  /* Ogni processo prepara un valore destinato ad ogni processo. 
+   */
   int send_values[4];
 
   for(int i = 0; i < comm_sz; i++) {

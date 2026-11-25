@@ -9,9 +9,9 @@
  *
  * L'obiettivo è mostrare:
  *
- *   - il rapporto tra parte sequenziale e parallelizzabile;
- *   - lo speedup teorico;
- *   - il limite massimo imposto dalla parte sequenziale.
+ * - il rapporto tra parte sequenziale e parallelizzabile;
+ * - lo speedup teorico;
+ * - il limite massimo imposto dalla parte sequenziale.
  * ---------------------------------------------------------------------- */
 
 #include <stdio.h>
@@ -22,37 +22,42 @@ int main() {
    *
    * Esempio:
    *
-   *      alpha = 0.8
+   *   alpha = 0.8
    *
    * significa che l'80% del lavoro è parallelizzabile,
-   * mentre il restante 20% è sequenziale. */
+   * mentre il restante 20% è sequenziale.
+   */
   double alpha = 0.8;
 
   /* Tempo di esecuzione sequenziale di riferimento.
    * Normalizziamo il problema assumendo:
    *
-   *      T_serial = 1 secondo
+   *   T_serial = 1 secondo
    *
    * perché la formula dipende solamente dai rapporti
-   * tra le parti del programma. */
+   * tra le parti del programma.
+   */
   double serial_time = 1.0;
 
   /* Numero di processi utilizzati.
    *
    * Cambiando questo valore possiamo osservare
-   * come cresce lo speedup. */
+   * come cresce lo speedup. 
+   */
   int processes = 8;
 
   /* Secondo la legge di Amdahl:
    *
-   *   T_parallel(p) = (1 - alpha) * T_serial + alpha * T_serial / p */
+   *   T_parallel(p) = (1 - alpha) * T_serial + alpha * T_serial / p 
+   */
   double parallel_time = (1 - alpha) * serial_time + (alpha * serial_time) / processes;
 
   /* Speedup teorico:
    *
    *            T_serial
    *   S(p) = -------------
-   *           T_parallel   */
+   *           T_parallel   
+   */
   double speedup = serial_time / parallel_time;
 
   /* Limite massimo dello speedup:
@@ -62,14 +67,15 @@ int main() {
    *          1 - alpha
    *
    * Si ottiene quando il numero di processi tende
-   * all'infinito. */
+   * all'infinito. *
+   */
   double max_speedup = 1 / (1 - alpha);
 
   printf("Frazione parallelizzabile: %.2f%%\n", alpha * 100);
   printf("Frazione sequenziale: %.2f%%\n\n", (1 - alpha) * 100);
   printf("Processi utilizzati: %d\n", processes);
   printf("Tempo sequenziale: %.3f secondi\n", serial_time);
-  printf("Tempo parallelo teorico: %.3f secondi\n", parallel_time);
+  printf("Te\mpo parallelo teorico: %.3f secondi\n", parallel_time);
   printf("Speedup teorico: %.3f\n", speedup);
   printf("Speedup massimo teorico: %.3f\n", max_speedup);
 
